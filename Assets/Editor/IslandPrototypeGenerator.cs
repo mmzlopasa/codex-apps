@@ -29,7 +29,7 @@ namespace FoundersFirstCivilization.Editor
             var terrain = BuildTerrain();
             BuildOcean();
             BuildLakeAndRiver(terrain);
-            BuildVolcano();
+            BuildVolcano(terrain);
             BuildWilds(terrain);
             BuildLighting();
             BuildCamera();
@@ -207,18 +207,21 @@ namespace FoundersFirstCivilization.Editor
             emission.rateOverTime = 60f;
         }
 
-        static void BuildVolcano()
+        static void BuildVolcano(Terrain terrain)
         {
             Vector3[] points = {
-                new Vector3(280f, 105f, -50f),
-                new Vector3(296f, 88f, -48f),
-                new Vector3(311f, 70f, -66f),
-                new Vector3(329f, 50f, -84f)
+                new Vector3(280f, 0f, -50f),
+                new Vector3(305f, 0f, -55f),
+                new Vector3(330f, 0f, -62f),
+                new Vector3(355f, 0f, -72f)
             };
+            for (int i = 0; i < points.Length; i++)
+                points[i].y = terrain.SampleHeight(points[i]) + 0.8f;
             CreateWaterSegments("Lava", points, 6f, new Color(1f, 0.25f, 0.035f));
             var crater = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             crater.name = "Dormant volcano crater";
-            crater.transform.position = new Vector3(280f, 108f, -50f);
+            Vector3 craterCenter = new Vector3(280f, 0f, -50f);
+            crater.transform.position = craterCenter + Vector3.up * (terrain.SampleHeight(craterCenter) + 0.4f);
             crater.transform.localScale = new Vector3(20f, 1f, 20f);
             Materialize(crater, "Crater stone", new Color(0.22f, 0.20f, 0.19f), 0.9f);
         }
