@@ -20,6 +20,19 @@ namespace FoundersFirstCivilization.Editor
             new Vector2(0.87f, 0.56f), new Vector2(0.96f, 0.56f)
         };
 
+        [InitializeOnLoadMethod]
+        static void GenerateOnFirstOpen()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                if (EditorApplication.isCompiling || EditorApplication.isPlayingOrWillChangePlaymode)
+                    return;
+                if (AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/Island.unity") != null)
+                    return;
+                Generate();
+            };
+        }
+
         [MenuItem("Founders/Generate Island Prototype")]
         public static void Generate()
         {
