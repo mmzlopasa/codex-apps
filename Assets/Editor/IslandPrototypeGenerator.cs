@@ -34,9 +34,23 @@ namespace FoundersFirstCivilization.Editor
             BuildLighting();
             BuildCamera();
             EditorSceneManager.SaveScene(scene, "Assets/Scenes/Island.unity");
+            EditorBuildSettings.scenes = new[] {
+                new EditorBuildSettingsScene("Assets/Scenes/Island.unity", true)
+            };
+            ConfigurePlayerSettings();
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("Island scene saved to Assets/Scenes/Island.unity");
+        }
+
+        static void ConfigurePlayerSettings()
+        {
+            PlayerSettings.productName = "Founders: First Civilization";
+            PlayerSettings.companyName = "mmzlopasa";
+            PlayerSettings.SetApplicationIdentifier(
+                BuildTargetGroup.iOS, "com.mmzlopasa.foundersfirstcivilization");
+            PlayerSettings.iOS.targetDevice = iOSTargetDevice.iPhoneAndiPad;
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
         }
 
         static Terrain BuildTerrain()
