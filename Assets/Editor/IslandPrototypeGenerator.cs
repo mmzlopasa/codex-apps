@@ -13,6 +13,12 @@ namespace FoundersFirstCivilization.Editor
         const float Height = 230f;
         const float SeaLevel = 18f;
         static readonly Color Ocean = new Color(0.11f, 0.32f, 0.42f);
+        static readonly Vector2[] RiverRoute = {
+            new Vector2(0.40f, 0.64f), new Vector2(0.47f, 0.62f),
+            new Vector2(0.53f, 0.60f), new Vector2(0.59f, 0.56f),
+            new Vector2(0.68f, 0.55f), new Vector2(0.77f, 0.55f),
+            new Vector2(0.87f, 0.56f), new Vector2(0.96f, 0.56f)
+        };
 
         [MenuItem("Founders/Generate Island Prototype")]
         public static void Generate()
@@ -67,10 +73,8 @@ namespace FoundersFirstCivilization.Editor
 
                 // Recessed lake basin and a narrow valley from the mountain.
                 land -= Gauss(u, v, 0.59f, 0.56f, 0.055f, 0.043f, 0.026f);
-                float riverCenter = 0.53f + 0.045f * Mathf.Sin((v - 0.46f) * 10f);
-                float riverEdge = u - riverCenter;
-                land -= Mathf.Exp(-(riverEdge * riverEdge) / 0.00011f)
-                    * Mathf.Clamp01((v - 0.44f) * 5f) * 0.025f;
+                float riverDistance = DistanceToRiver(u, v);
+                land -= Mathf.Exp(-(riverDistance * riverDistance) / 0.00014f) * 0.085f;
 
                 heights[z, x] = Mathf.Clamp01(SeaLevel / Height + land * coast);
             }
@@ -156,32 +160,28 @@ namespace FoundersFirstCivilization.Editor
         {
             var lake = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             lake.name = "Lake | river basin";
-            lake.transform.position = new Vector3(90f, SeaLevel + 10f, 60f);
+            Vector3 lakeCenter = World(0.59f, 0.56f);
+            lake.transform.position = lakeCenter + Vector3.up * (terrain.SampleHeight(lakeCenter) + 0.3f);
             lake.transform.localScale = new Vector3(48f, 0.45f, 34f);
             Materialize(lake, "Lake water", new Color(0.20f, 0.48f, 0.58f), 0.8f);
 
-            Vector3[] path = {
-                new Vector3(-92f, 124f, 190f),
-                new Vector3(-56f, 97f, 157f),
-                new Vector3(-24f, 71f, 127f),
-                new Vector3(17f, 48f, 100f),
-                new Vector3(58f, 40f, 77f),
-                new Vector3(91f, 29f, 55f),
-                new Vector3(128f, 28f, 18f),
-                new Vector3(163f, 27f, -25f),
-                new Vector3(197f, 25f, -88f)
-            };
+            Vector3[] path = new Vector3[RiverRoute.Length];
+            for (int i = 0; i < RiverRoute.Length; i++)
+            {
+                Vector3 point = World(RiverRoute[i].x, RiverRoute[i].y);
+                path[i] = point + Vector3.up * (terrain.SampleHeight(point) + 0.8f);
+            }
             CreateWaterSegments("River | waterfall, lake and ocean", path, 8f,
                 new Color(0.20f, 0.48f, 0.58f));
 
             var fall = GameObject.CreatePrimitive(PrimitiveType.Cube);
             fall.name = "Great waterfall | mountain spring";
-            fall.transform.position = new Vector3(-92f, 104f, 190f);
-            fall.transform.localScale = new Vector3(28f, 40f, 3f);
+            fall.transform.position = new Vector3(-100f, 132f, 190f);
+            fall.transform.localScale = new Vector3(28f, 64f, 3f);
             Materialize(fall, "Waterfall", new Color(0.62f, 0.83f, 0.86f), 0.3f);
 
             var spray = new GameObject("Waterfall spray");
-            spray.transform.position = new Vector3(-92f, 83f, 192f);
+            spray.transform.position = new Vector3(-100f, 99f, 192f);
             var particles = spray.AddComponent<ParticleSystem>();
             var main = particles.main;
             main.startLifetime = 1.1f;
@@ -195,17 +195,16 @@ namespace FoundersFirstCivilization.Editor
 
         static void BuildVolcano()
         {
-            var lava = new GameObject("Volcanic lava run");
             Vector3[] points = {
-                new Vector3(280f, 69f, -30f),
-                new Vector3(296f, 56f, -48f),
-                new Vector3(311f, 42f, -66f),
-                new Vector3(329f, 30f, -84f)
+                new Vector3(280f, 105f, -50f),
+                new Vector3(296f, 88f, -48f),
+                new Vector3(311f, 70f, -66f),
+                new Vector3(329f, 50f, -84f)
             };
             CreateWaterSegments("Lava", points, 6f, new Color(1f, 0.25f, 0.035f));
             var crater = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             crater.name = "Dormant volcano crater";
-            crater.transform.position = new Vector3(280f, 72f, -50f);
+            crater.transform.position = new Vector3(280f, 108f, -50f);
             crater.transform.localScale = new Vector3(20f, 1f, 20f);
             Materialize(crater, "Crater stone", new Color(0.22f, 0.20f, 0.19f), 0.9f);
         }
@@ -374,6 +373,20 @@ namespace FoundersFirstCivilization.Editor
         {
             float dx = (x - cx) / sx, dy = (y - cy) / sy;
             return Mathf.Exp(-0.5f * (dx * dx + dy * dy)) * peak;
+        }
+
+        static float DistanceToRiver(float x, float y)
+        {
+            var point = new Vector2(x, y);
+            float nearest = float.MaxValue;
+            for (int i = 0; i < RiverRoute.Length - 1; i++)
+            {
+                Vector2 a = RiverRoute[i], b = RiverRoute[i + 1];
+                Vector2 segment = b - a;
+                float t = Mathf.Clamp01(Vector2.Dot(point - a, segment) / segment.sqrMagnitude);
+                nearest = Mathf.Min(nearest, Vector2.Distance(point, a + t * segment));
+            }
+            return nearest;
         }
 
         static float Distance(float x, float y, float cx, float cy)
