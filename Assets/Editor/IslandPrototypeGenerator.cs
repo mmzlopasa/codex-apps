@@ -250,6 +250,11 @@ namespace FoundersFirstCivilization.Editor
                 NewMaterial("Lavender flowers", new Color(0.59f, 0.48f, 0.72f)),
                 NewMaterial("Cream flowers", new Color(0.91f, 0.86f, 0.65f))
             };
+            var ores = new[] {
+                NewMaterial("Iron ore", new Color(0.30f, 0.31f, 0.32f)),
+                NewMaterial("Copper ore", new Color(0.63f, 0.34f, 0.20f)),
+                NewMaterial("Gold ore", new Color(0.78f, 0.61f, 0.22f))
+            };
 
             Random.InitState(1834);
             int trees = 0, attempts = 0;
@@ -281,6 +286,29 @@ namespace FoundersFirstCivilization.Editor
                 rock.transform.localScale = new Vector3(Random.Range(2f, 5f), Random.Range(1f, 3f), Random.Range(2f, 4f));
                 rock.transform.rotation = Random.rotation;
                 rock.GetComponent<Renderer>().sharedMaterial = stone;
+            }
+
+            for (int i = 0; i < 42; i++)
+            {
+                float u = Random.Range(0.33f, 0.52f), v = Random.Range(0.61f, 0.78f);
+                Vector3 p = World(u, v);
+                float y = terrain.SampleHeight(p);
+                if (y < 75f) continue;
+                int kind = Random.Range(0, ores.Length);
+                var deposit = new GameObject(new[] { "Iron vein | mineable", "Copper vein | mineable", "Gold vein | mineable" }[kind]);
+                deposit.transform.SetParent(root.transform);
+                deposit.transform.position = p + Vector3.up * y;
+                int pieces = Random.Range(2, 5);
+                for (int n = 0; n < pieces; n++)
+                {
+                    var chunk = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    chunk.name = "Ore fragment";
+                    chunk.transform.SetParent(deposit.transform);
+                    chunk.transform.localPosition = new Vector3(Random.Range(-3f, 3f), Random.Range(0f, 1.8f), Random.Range(-3f, 3f));
+                    chunk.transform.localScale = new Vector3(Random.Range(2.5f, 5f), Random.Range(2f, 4f), Random.Range(2.5f, 5f));
+                    chunk.transform.rotation = Random.rotation;
+                    chunk.GetComponent<Renderer>().sharedMaterial = ores[kind];
+                }
             }
 
             for (int i = 0; i < 80; i++)
@@ -386,6 +414,7 @@ namespace FoundersFirstCivilization.Editor
             var material = new Material(Shader.Find("Standard"));
             material.name = name;
             material.color = color;
+            material.enableInstancing = true;
             return material;
         }
 
