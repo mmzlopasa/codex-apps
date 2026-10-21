@@ -10,9 +10,9 @@ The next milestones will add a touch-friendly camera and terrain editing, free p
 
 ## Open in Unity
 
-Open the repository root as a Unity project using Unity 2022.3 LTS. After the first import, use **Founders > Generate Island Prototype** to create `Assets/Scenes/Island.unity`. The generator also sets the iOS app name, bundle identifier, and landscape orientation, and adds the scene to the build list.
+Open the repository root as a Unity project using Unity 2022.3 LTS. On the first Unity launch, the editor script automatically creates `Assets/Scenes/Island.unity` and its terrain assets. The **Founders > Generate Island Prototype** menu can regenerate the prototype. The generator also sets the iOS app name, bundle identifier, and landscape orientation, and adds the scene to the build list.
 
-After generation, commit `Assets/Generated/`, `Assets/Scenes/`, and their `.meta` files to GitHub if you want the generated scene and terrain data available on your other computers.
+The source recipe is versioned in GitHub, so the same terrain can be generated on another computer by opening the project in Unity.
 
 ## Build for iOS
 
