@@ -38,6 +38,8 @@ namespace FoundersFirstCivilization.Editor
         {
             EnsureFolder("Assets/Generated");
             EnsureFolder("Assets/Scenes");
+            RemovePreviousGeneratedAssets();
+            Random.InitState(1834);
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var terrain = BuildTerrain();
             BuildOcean();
@@ -54,6 +56,25 @@ namespace FoundersFirstCivilization.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("Island scene saved to Assets/Scenes/Island.unity");
+        }
+
+        static void RemovePreviousGeneratedAssets()
+        {
+            string[] generatedAssets = {
+                "Assets/Generated/IslandTerrain.asset",
+                "Assets/Generated/MeadowTexture.asset",
+                "Assets/Generated/Meadow.terrainlayer",
+                "Assets/Generated/CoastalSandTexture.asset",
+                "Assets/Generated/CoastalSand.terrainlayer",
+                "Assets/Generated/MountainStoneTexture.asset",
+                "Assets/Generated/MountainStone.terrainlayer",
+                "Assets/Generated/HighPeakTexture.asset",
+                "Assets/Generated/HighPeak.terrainlayer",
+                "Assets/Generated/VolcanicAshTexture.asset",
+                "Assets/Generated/VolcanicAsh.terrainlayer"
+            };
+            foreach (string asset in generatedAssets)
+                AssetDatabase.DeleteAsset(asset);
         }
 
         static void ConfigurePlayerSettings()
